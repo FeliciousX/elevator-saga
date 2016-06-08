@@ -5,10 +5,8 @@
             down: {}
         };
 
-
         function elevatorLogic( elevator, index ) {
-            // Whenever the elevator is idle (has no more queued destinations) ...
-            elevator.on("idle", function() {
+            function onIdle() {
                 // check array for data
                 var floorArrs = floors.map( function( floor ) { return floor.floorNum() });
 
@@ -35,14 +33,9 @@
                     this.goingUpIndicator(false);
                     this.goingDownIndicator(true);
                 }
-            });
+            }
 
-            elevator.on("floor_button_pressed", function(floorNum) {
-                // queue action
-                this.goToFloor( floorNum );
-            });
-
-            elevator.on("passing_floor", function(floorNum, direction) {
+            function beforePassingFloor( floorNum, direction ) {
                 // set indicator
                 var direction = this.destinationDirection();
 
@@ -73,10 +66,9 @@
                     });
                     this.checkDestinationQueue();
                 }
+            }
 
-            });
-
-            elevator.on("stopped_at_floor", function( floorNum ) {
+            function onStop( floorNum ) {
                 // set indicator
                 if ( this.currentFloor() === 0 ) {
                     this.goingUpIndicator(true);
@@ -98,7 +90,16 @@
                     this.goingDownIndicator(true);
                     floorGoing[direction][floorNum] = false;
                 }
-            });
+            }
+
+            // Whenever the elevator is idle (has no more queued destinations) ...
+            elevator.on("idle", onIdle);
+
+            elevator.on("floor_button_pressed", elevator.goToFloor);
+
+            elevator.on("passing_floor", beforePassingFloor);
+
+            elevator.on("stopped_at_floor", onStop);
         }
 
         function floorLogic( floor ) {
