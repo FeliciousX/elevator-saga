@@ -49,6 +49,11 @@
                     this.goingDownIndicator(true);
                 }
 
+                if ( direction === 'stopped' ) {
+                    this.goingUpIndicator(true);
+                    this.goingDownIndicator(true);
+                }
+
                 // decide if need to stop or not
                 var isFloorSelected = this.getPressedFloors()
                 .some( function(floor) {
@@ -61,10 +66,6 @@
                     floorGoing[direction][floorNum] // outside selected
                 ) {
                     this.goToFloor( floorNum, true );
-                    this.destinationQueue = this.destinationQueue.filter( function(floor) {
-                        return floor !== floorNum;
-                    });
-                    this.checkDestinationQueue();
                 }
             }
 
