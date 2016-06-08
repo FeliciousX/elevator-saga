@@ -20,6 +20,7 @@
                 }
 
                 this.goToFloor( floorToGo );
+                console.log( 'goToFloor', this.destinationQueue );
 
                 this.goingUpIndicator(true);
                 this.goingDownIndicator(true);
@@ -36,6 +37,7 @@
             }
 
             function beforePassingFloor( floorNum, direction ) {
+                console.log( direction, floorGoing[direction] );
                 // set indicator
                 var direction = this.destinationDirection();
 
@@ -65,17 +67,35 @@
                     this.loadFactor() < 1 && // not full
                     floorGoing[direction][floorNum] // outside selected
                 ) {
+                    var log = {
+                        floorNum: floorNum,
+                        pressed: isFloorSelected,
+                        load: this.loadFactor(),
+                        called: floorGoing[direction][floorNum]
+                    };
+                    console.log( 'reason for stopping', log );
                     this.goToFloor( floorNum, true );
                 }
+
+                console.log( 'current queue', this.destinationQueue );
             }
 
             function onStop( floorNum ) {
+                console.log( 'queue', this.destinationQueue );
+
+                this.destinationQueue = this.destinationQueue
+                .filter( function( q ) {
+                    return q !== floorNum;
+                });
+                this.checkDestinationQueue();
+
                 // set indicator
                 if ( this.currentFloor() === 0 ) {
                     this.goingUpIndicator(true);
                     this.goingDownIndicator(false);
 
                     floorGoing.up[0] = false;
+                    console.log( 'clearing', 0, 'up', floorGoing.up);
                 }
 
                 if ( this.currentFloor() === floors.length - 1 ) {
@@ -83,6 +103,7 @@
                     this.goingDownIndicator(true);
 
                     floorGoing.down[floors.length - 1] = false;
+                    console.log( 'clearing', floors.length - 1, 'down', floorGoing.down);
                 }
 
                 var direction = this.destinationDirection();
@@ -90,13 +111,17 @@
                     this.goingUpIndicator(true);
                     this.goingDownIndicator(true);
                     floorGoing[direction][floorNum] = false;
+                    console.log( 'clearing', floorNum, direction, floorGoing[direction]);
                 }
             }
 
             // Whenever the elevator is idle (has no more queued destinations) ...
             elevator.on("idle", onIdle);
 
-            elevator.on("floor_button_pressed", elevator.goToFloor);
+            elevator.on("floor_button_pressed", function(floorNum) {
+                this.goToFloor( floorNum );
+                console.log( 'goToFloor', this.destinationQueue );
+            });
 
             elevator.on("passing_floor", beforePassingFloor);
 
@@ -112,12 +137,14 @@
 
             floor.on("up_button_pressed", function() {
                 // mutate state for needing to go up
-                floorGoing.up[level] = true
+                floorGoing.up[level] = true;
+                console.log( 'setting', level, 'up', floorGoing.up );
             });
 
             floor.on("down_button_pressed", function() {
                 // mutate state for needing to go down
                 floorGoing.down[level] = true
+                console.log( 'setting', level, 'down', floorGoing.down );
             });
         }
 
