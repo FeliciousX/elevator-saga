@@ -64,7 +64,7 @@
 
                 if(
                     isFloorSelected ||
-                    this.loadFactor() < 1 && // not full
+                    this.loadFactor() < 0.5 && // not full
                     floorGoing[direction][floorNum] // outside selected
                 ) {
                     var log = {
